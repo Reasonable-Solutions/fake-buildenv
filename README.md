@@ -24,11 +24,15 @@ cowsay hello
 The selected execd profile must set `allowUserEnvironments = true`.
 
 ```console
+env \
+  SOKK_PROFILE=gpu-shell \
+  SOKK_FLAKE=github:Reasonable-Solutions/fake-buildenv \
+  SOKK_SESSION=new \
 ssh -tt -F /dev/null -p 2222 \
   -i "$HOME/.ssh/execd-p-carl" \
   -o CertificateFile="$HOME/.ssh/execd-p-carl-cert.pub" \
   -o IdentitiesOnly=yes \
-  -o 'SetEnv=SOKK_PROFILE=gpu-shell SOKK_FLAKE=github:Reasonable-Solutions/fake-buildenv SOKK_SESSION=new' \
+  -o 'SendEnv=SOKK_PROFILE SOKK_FLAKE SOKK_SESSION' \
   p-carl@127.0.0.1
 ```
 
