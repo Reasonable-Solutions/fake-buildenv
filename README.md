@@ -5,7 +5,9 @@ transient execution service. The default package contains:
 
 - Bash and GNU coreutils;
 - cowsay;
-- Python 3;
+- Python 3 with JupyterLab, NumPy, pandas, SciPy, scikit-learn, Matplotlib,
+  and seaborn;
+- Git, jq, and ripgrep;
 - the Palmer Penguins CSV dataset; and
 - `penguin-stats` and `penguin-demo` commands.
 
@@ -16,6 +18,8 @@ nix run
 nix shell
 penguin-demo
 python3 --version
+python3 -c 'import numpy, pandas, scipy, sklearn, matplotlib, seaborn'
+jupyter lab --version
 cowsay hello
 ```
 
@@ -41,7 +45,13 @@ Once connected:
 ```console
 penguin-demo
 penguin-stats
+jupyter lab --no-browser
 ```
+
+The scientific Python stack is intentionally a reasonably large closure. A
+cold machine should spend long enough evaluating and downloading it to make
+execd's setup progress visible; later sessions reuse the realised Nix store
+paths and should come up much faster.
 
 `gpu-shell` still controls CPU, memory, fake-GPU, network, and lifetime policy;
 this flake only supplies the filesystem environment.

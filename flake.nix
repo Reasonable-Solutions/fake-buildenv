@@ -23,7 +23,18 @@
               "$out/share/fake-buildenv/penguins.csv"
           '';
 
-          python = pkgs.python3;
+          # Deliberately substantial: the demo is also useful for observing a
+          # cold user-environment evaluation/download before subsequent runs
+          # hit the Nix store cache.
+          python = pkgs.python3.withPackages (packages: with packages; [
+            jupyterlab
+            matplotlib
+            numpy
+            pandas
+            scikit-learn
+            scipy
+            seaborn
+          ]);
 
           penguinStats = pkgs.writeShellApplication {
             name = "penguin-stats";
@@ -48,6 +59,9 @@
               pkgs.bashInteractive
               pkgs.coreutils
               pkgs.cowsay
+              pkgs.gitMinimal
+              pkgs.jq
+              pkgs.ripgrep
               python
               penguinsData
               penguinStats

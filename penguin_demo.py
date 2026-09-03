@@ -1,13 +1,13 @@
 #!/usr/bin/env python3
-"""Print a compact summary of the Palmer Penguins dataset."""
+"""Analyse the Palmer Penguins dataset with pandas and scikit-learn."""
 
 from __future__ import annotations
 
-import csv
-import statistics
 import sys
-from collections import Counter, defaultdict
 from pathlib import Path
+
+import pandas as pd
+from sklearn.linear_model import LinearRegression
 
 
 def main() -> None:
@@ -15,19 +15,20 @@ def main() -> None:
         raise SystemExit(f"usage: {Path(sys.argv[0]).name} DATASET.csv")
 
     dataset = Path(sys.argv[1])
-    with dataset.open(newline="", encoding="utf-8") as stream:
-        rows = list(csv.DictReader(stream))
+    penguins = pd.read_csv(dataset)
 
-    counts = Counter(row["species"] for row in rows)
-    masses: dict[str, list[float]] = defaultdict(list)
-    for row in rows:
-        if row["body_mass_g"] not in {"", "NA"}:
-            masses[row["species"]].append(float(row["body_mass_g"]))
+    print(f"Palmer Penguins: {len(penguins)} observations")
+    summary = penguins.groupby("species")["body_mass_g"].agg(["count", "mean"])
+    for species, row in summary.sort_index().iterrows():
+        print(f"{species}: {int(row['count'])} birds, mean mass {row['mean']:.0f} g")
 
-    print(f"Palmer Penguins: {len(rows)} observations")
-    for species in sorted(counts):
-        mean_mass = statistics.fmean(masses[species])
-        print(f"{species}: {counts[species]} birds, mean mass {mean_mass:.0f} g")
+    features = ["bill_length_mm", "bill_depth_mm", "flipper_length_mm"]
+    complete = penguins.dropna(subset=[*features, "body_mass_g"])
+    model = LinearRegression().fit(complete[features], complete["body_mass_g"])
+    print(
+        "Linear mass model: "
+        f"{len(complete)} complete rows, R^2={model.score(complete[features], complete['body_mass_g']):.3f}"
+    )
 
 
 if __name__ == "__main__":
