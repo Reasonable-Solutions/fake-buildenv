@@ -28,8 +28,7 @@ ssh -tt -F /dev/null -p 2222 \
   -i "$HOME/.ssh/execd-p-carl" \
   -o CertificateFile="$HOME/.ssh/execd-p-carl-cert.pub" \
   -o IdentitiesOnly=yes \
-  -o SetEnv=SOKK_PROFILE=gpu-shell \
-  -o SetEnv=SOKK_FLAKE=github:Reasonable-Solutions/fake-buildenv \
+  -o 'SetEnv=SOKK_PROFILE=gpu-shell SOKK_FLAKE=github:Reasonable-Solutions/fake-buildenv SOKK_SESSION=new' \
   p-carl@127.0.0.1
 ```
 
