@@ -53,6 +53,15 @@
             '';
           };
 
+          penguinJob = pkgs.writeShellApplication {
+            name = "penguin-job";
+            runtimeInputs = [ python ];
+            text = ''
+              exec python3 ${./penguin_job.py} \
+                ${penguinsData}/share/fake-buildenv/penguins.csv "$@"
+            '';
+          };
+
           environment = pkgs.buildEnv {
             name = "fake-buildenv";
             paths = [
@@ -66,18 +75,23 @@
               penguinsData
               penguinStats
               penguinDemo
+              penguinJob
             ];
           };
         in
         {
           default = environment;
-          inherit environment penguinDemo penguinStats penguinsData;
+          inherit environment penguinDemo penguinJob penguinStats penguinsData;
         });
 
       apps = forAllSystems (system: {
         default = {
           type = "app";
           program = "${self.packages.${system}.penguinDemo}/bin/penguin-demo";
+        };
+        job = {
+          type = "app";
+          program = "${self.packages.${system}.penguinJob}/bin/penguin-job";
         };
       });
     };

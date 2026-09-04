@@ -9,14 +9,16 @@ transient execution service. The default package contains:
   and seaborn;
 - Git, jq, and ripgrep;
 - the Palmer Penguins CSV dataset; and
-- `penguin-stats` and `penguin-demo` commands.
+- `penguin-stats`, `penguin-demo`, and `penguin-job` commands.
 
 ## Try it locally
 
 ```console
 nix run
+nix run .#job -- --steps 4 --delay 0.25
 nix shell
 penguin-demo
+penguin-job --steps 4 --delay 0.25
 python3 --version
 python3 -c 'import numpy, pandas, scipy, sklearn, matplotlib, seaborn'
 jupyter lab --version
@@ -45,7 +47,33 @@ Once connected:
 ```console
 penguin-demo
 penguin-stats
+penguin-job --steps 4
 jupyter lab --no-browser
+```
+
+## Try a detached job
+
+`penguin-job` performs repeatable bootstrap fits, writes progress to stderr, and
+emits one JSON result on stdout. Its default runtime is long enough to follow,
+cancel, or restart the execd daemon while it is active:
+
+```console
+job=$(execctl job submit \
+  --profile fetch \
+  --flake github:Reasonable-Solutions/fake-buildenv \
+  -- penguin-job --steps 20 --delay 1)
+
+execctl job status "$job"
+execctl job logs --stream stderr --follow "$job"
+execctl job wait "$job"
+execctl job logs --stream stdout "$job" | jq
+```
+
+The same app can be exercised directly through the flake output:
+
+```console
+nix run github:Reasonable-Solutions/fake-buildenv#job -- \
+  --steps 5 --delay 0.5
 ```
 
 The scientific Python stack is intentionally a reasonably large closure. A
